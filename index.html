@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portail des Formations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajwal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Tajwal', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: { 50: '#f0fdf4', 500: '#22c55e', 600: '#16a34a', 900: '#14532d' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Tajwal', sans-serif; background-color: #f8fafc; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <nav class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <svg class="h-8 w-8 text-brand-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21l9-5-9-5-9 5 9 5z" />
+                    </svg>
+                    <span class="font-bold text-xl text-gray-800">Inscriptions Formations</span>
+                </div>
+                <div class="flex items-center">
+                    <button onclick="toggleAdmin()" class="text-sm font-medium text-gray-500 hover:text-brand-600 transition">Mode Admin</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <div id="user-view">
+            <h1 class="text-3xl font-bold text-gray-900 mb-8 text-center">Formations Disponibles</h1>
+            <div id="formations-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <p class="text-gray-500 text-center col-span-full">Chargement des formations...</p>
+            </div>
+        </div>
+
+        <div id="admin-view" class="hidden">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-900">Tableau de bord Administrateur</h1>
+                <button onclick="openAdminModal()" class="bg-brand-600 hover:bg-brand-500 text-white px-4 py-2 rounded-lg font-medium shadow transition">
+                    + Nouvelle Formation
+                </button>
+            </div>
+            
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Formation</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Lieu</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-table-body" class="bg-white divide-y divide-gray-200">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="inscription-modal" class="fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-900">Formulaire d'inscription</h3>
+                <button onclick="closeModal('inscription-modal')" class="text-gray-400 hover:text-gray-600">&times;</button>
+            </div>
+            <form id="inscription-form" onsubmit="submitInscription(event)" class="p-6 space-y-4">
+                <input type="hidden" id="ins-formation-id">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+                        <input type="text" id="ins-nom" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-brand-500 focus:border-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
+                        <input type="text" id="ins-prenom" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-brand-500 focus:border-brand-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Service</label>
+                    <select id="ins-service" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-brand-500 focus:border-brand-500">
+                        <option value="">Sélectionnez un service</option>
+                        <option value="Direction">Direction</option>
+                        <option value="Ressources Humaines">Ressources Humaines</option>
+                        <option value="Informatique">Informatique</option>
+                        <option value="Technique">Technique</option>
+                        <option value="Commercial">Commercial</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Grade</label>
+                    <select id="ins-grade" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-brand-500 focus:border-brand-500">
+                        <option value="">Sélectionnez un grade</option>
+                        <option value="Employé">Employé</option>
+                        <option value="Technicien">Technicien</option>
+                        <option value="Cadre">Cadre</option>
+                        <option value="Cadre Supérieur">Cadre Supérieur</option>
+                    </select>
+                </div>
+                <div class="pt-4">
+                    <button type="submit" class="w-full bg-brand-600 text-white font-bold rounded-lg px-4 py-3 hover:bg-brand-500 transition shadow">Confirmer l'inscription</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="admin-modal" class="fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-900">Ajouter une formation</h3>
+                <button onclick="closeModal('admin-modal')" class="text-gray-400 hover:text-gray-600">&times;</button>
+            </div>
+            <div class="overflow-y-auto p-6">
+                <form id="admin-form" onsubmit="submitFormation(event)" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nom (Français)</label>
+                            <input type="text" id="add-name-fr" required class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                        </div>
+                        <div dir="rtl">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nom (Arabe) - الاسم</label>
+                            <input type="text" id="add-name-ar" required class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nom du Formateur</label>
+                            <input type="text" id="add-formateur" required class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Lieu</label>
+                            <input type="text" id="add-location" required class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                            <input type="date" id="add-date" required class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Heure</label>
+                            <input type="time" id="add-time" required class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">URL de l'image (Aperçu)</label>
+                        <input type="url" id="add-image" placeholder="https://..." required class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea id="add-desc" rows="3" required class="w-full border border-gray-300 rounded-lg px-3 py-2"></textarea>
+                    </div>
+                    <div class="pt-4">
+                        <button type="submit" class="w-full bg-gray-900 text-white font-bold rounded-lg px-4 py-3 hover:bg-gray-800 transition shadow">Créer la formation</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === CONFIGURATION API ===
+        // Remplacez par l'URL de votre Cloudflare Worker
+        const API_URL = 'https://votre-worker.votre-compte.workers.dev/api';
+        
+        let formationsList = [];
+        let isAdmin = false;
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', fetchFormations);
+
+        function toggleAdmin() {
+            isAdmin = !isAdmin;
+            document.getElementById('user-view').classList.toggle('hidden', isAdmin);
+            document.getElementById('admin-view').classList.toggle('hidden', !isAdmin);
+        }
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function openAdminModal() { openModal('admin-modal'); }
+
+        function openInscriptionModal(formationId) {
+            document.getElementById('ins-formation-id').value = formationId;
+            openModal('inscription-modal');
+        }
+
+        // --- API CALLS ---
+
+        async function fetchFormations() {
+            try {
+                const res = await fetch(`${API_URL}/formations`);
+                formationsList = await res.json();
+                renderUserView();
+                renderAdminView();
+            } catch (err) {
+                console.error("Erreur de chargement", err);
+                document.getElementById('formations-grid').innerHTML = '<p class="text-red-500">Erreur de connexion à la base de données.</p>';
+            }
+        }
+
+        async function submitInscription(e) {
+            e.preventDefault();
+            const payload = {
+                formation_id: document.getElementById('ins-formation-id').value,
+                nom: document.getElementById('ins-nom').value,
+                prenom: document.getElementById('ins-prenom').value,
+                service: document.getElementById('ins-service').value,
+                grade: document.getElementById('ins-grade').value
+            };
+
+            try {
+                await fetch(`${API_URL}/inscriptions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                alert('Inscription réussie !');
+                closeModal('inscription-modal');
+                e.target.reset();
+            } catch (err) {
+                alert('Erreur lors de l\'inscription.');
+            }
+        }
+
+        async function submitFormation(e) {
+            e.preventDefault();
+            const payload = {
+                name_fr: document.getElementById('add-name-fr').value,
+                name_ar: document.getElementById('add-name-ar').value,
+                formateur: document.getElementById('add-formateur').value,
+                location: document.getElementById('add-location').value,
+                date: document.getElementById('add-date').value,
+                time: document.getElementById('add-time').value,
+                description: document.getElementById('add-desc').value,
+                image_url: document.getElementById('add-image').value
+            };
+
+            try {
+                await fetch(`${API_URL}/formations`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                alert('Formation ajoutée !');
+                closeModal('admin-modal');
+                e.target.reset();
+                fetchFormations(); // Recharger la liste
+            } catch (err) {
+                alert('Erreur lors de l\'ajout.');
+            }
+        }
+
+        async function exportInscriptions(formationId, formationName) {
+            try {
+                const res = await fetch(`${API_URL}/inscriptions?formation_id=${formationId}`);
+                const data = await res.json();
+                
+                if (data.length === 0) {
+                    alert("Aucun inscrit pour cette formation.");
+                    return;
+                }
+
+                // Convertir JSON en CSV
+                const headers = ['ID', 'Nom', 'Prenom', 'Service', 'Grade', 'Date inscription'];
+                const csvRows = [headers.join(',')];
+                
+                data.forEach(row => {
+                    csvRows.push([row.id, row.nom, row.prenom, row.service, row.grade, row.created_at].join(','));
+                });
+
+                const csvString = csvRows.join('\n');
+                const blob = new Blob([csvString], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.setAttribute('hidden', '');
+                a.setAttribute('href', url);
+                a.setAttribute('download', `inscrits_${formationName.replace(/\s+/g, '_')}.csv`);
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } catch (err) {
+                alert("Erreur lors de l'exportation.");
+            }
+        }
+
+        // --- RENDERING ---
+
+        function renderUserView() {
+            const grid = document.getElementById('formations-grid');
+            if (formationsList.length === 0) {
+                grid.innerHTML = '<p class="text-gray-500 col-span-full text-center">Aucune formation disponible pour le moment.</p>';
+                return;
+            }
+
+            grid.innerHTML = formationsList.map(f => `
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition">
+                    <img src="${f.image_url}" alt="Aperçu" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <h2 class="text-xl font-bold text-gray-900 leading-tight">${f.name_fr}</h2>
+                            <span class="text-lg font-bold text-gray-600 font-arabic" dir="rtl">${f.name_ar}</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-4 line-clamp-2">${f.description}</p>
+                        
+                        <div class="space-y-2 mb-6 text-sm text-gray-600">
+                            <div class="flex items-center"><span class="font-semibold w-24">Formateur :</span> ${f.formateur}</div>
+                            <div class="flex items-center"><span class="font-semibold w-24">Lieu :</span> ${f.location}</div>
+                            <div class="flex items-center"><span class="font-semibold w-24">Date & Heure :</span> ${f.date} à ${f.time}</div>
+                        </div>
+
+                        <button onclick="openInscriptionModal(${f.id})" class="w-full block text-center bg-brand-50 text-brand-600 hover:bg-brand-600 hover:text-white font-bold py-2 px-4 rounded-lg transition">
+                            S'inscrire
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderAdminView() {
+            const tbody = document.getElementById('admin-table-body');
+            tbody.innerHTML = formationsList.map(f => `
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">${f.name_fr}</div>
+                        <div class="text-sm text-gray-500">${f.formateur}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${f.date} à ${f.time}</div>
+                        <div class="text-sm text-gray-500">${f.location}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button onclick="exportInscriptions(${f.id}, '${f.name_fr}')" class="text-brand-600 hover:text-brand-900 font-bold bg-brand-50 px-3 py-1 rounded">
+                            Exporter CSV
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
